@@ -1,0 +1,29 @@
+{
+  "name": "busanalysis",
+  "version": "1.0.0",
+  "description": "",
+  "main": "inputJson.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "lint": "eslint src/",
+    "start": "node --env-file=.env src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "leaflet": "^1.9.4",
+    "react-leaflet": "^5.0.0",
+    "redis": "^6.1.0",
+    "ws": "^8.21.0"
+  }
+}

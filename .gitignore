@@ -1,0 +1,9 @@
+node_modules/
+.env
+
+docker-compose.yml
+redis_data/
+
+dist
+frontend/dist
+.DS_Store
