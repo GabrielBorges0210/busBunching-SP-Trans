@@ -1,11 +1,25 @@
 import { connectToCache } from '../infrastructure/redisClient.js';
 import { EventEmitter } from 'events';
+import { connectToDatabase } from '../infrastructure/mongoClient.js';
 
 export const engineEvents = new EventEmitter();
 
 // Internal memory to manage the incident state machine
 // Structure: { 'A-B': { line: '8000-10', lastSeenAt: 1690000000000, isNotified: true } }
 const activeIncidentsRegistry = new Map();
+
+engineEvents.on('incident_resolved', async (state) => {
+    try {
+        const db = await connectToDatabase();
+        await db.collection('incidents').insertOne({
+            ...state,
+            resolvedAt: Date.now(),
+            duration: Date.now() - state.lastSeenAt
+        });
+    } catch (err) {
+        console.error('mongo_archive_failed', err);
+    }
+});
 
 export async function startBunchingEngine() {
     try {
@@ -31,11 +45,13 @@ export async function startBunchingEngine() {
 
             for (const vehiclePrefix of activeVehicles) {
 
-                const nearbyVehicles = await cache.geoSearch(
-                    spatialKey,
-                    vehiclePrefix,
-                    { radius: 300, unit: 'm' }
-                );
+                let nearbyVehicles = [];
+                try {
+                    nearbyVehicles = await cache.geoSearch(spatialKey, vehiclePrefix, { radius: 300, unit: 'm' });
+                } catch (err) {
+                    if (err.message.includes('could not decode')) continue;
+                    throw err;
+                }
 
                 for (const vehicle of nearbyVehicles) {
                     if (vehicle === vehiclePrefix) continue; // Ignora distância para si mesmo

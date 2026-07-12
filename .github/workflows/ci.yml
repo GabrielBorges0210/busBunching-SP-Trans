@@ -1,0 +1,44 @@
+# NOME DA PIPELINE
+name: Node.js Continuous Integration
+
+# TRIGGERS
+# Quando essa máquina virtual deve ligar?
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-verification:
+    # O AMBIENTE (RUNNER)
+    runs-on: ubuntu-latest
+
+    # MATRIZ DE TESTES
+    # Garantir que o código rode na versão 20 do Node
+    strategy:
+      matrix:
+        node-version: [20.x]
+
+    # Algoritmo da automação
+    steps:
+      # O GitHub faz o download do repositório para dentro desse servidor Ubuntu
+      - name: Checkout do Código
+        uses: actions/checkout@v3
+
+      # Instala o Node.js no servidor
+      - name: Configurando Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Tenta instalar as dependências do seu Backend.
+      - name: Instalando Dependências do Backend
+        run: npm ci
+
+      # Se tivesse testes unitários, eles rodariam aqui.
+      # Como não temos ainda, vamos garantir apenas que a sintaxe do projeto não tem erros fatais de importação.
+      # Vamos mandar o Node checar o arquivo principal sem executá-lo de fato.
+      - name: 🔍 Verificação de Sintaxe (Syntax Check)
+        run: node --check src/server.js
