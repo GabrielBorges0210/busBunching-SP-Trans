@@ -1,23 +1,29 @@
 import { createClient } from 'redis';
 
-let activeCacheClient = null;
+let connectionPromise = null;
 
 export async function connectToCache() {
-    if (activeCacheClient) {
-        return activeCacheClient;
+    // Se a conexão já está em andamento ou concluída, retorna a mesma Promise
+    if (connectionPromise) {
+        return connectionPromise;
     }
 
-    const cacheUrl = process.env.REDIS_URL || 'redis://localhost:6379';
+    const cacheUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 
-    console.log("Creating cache client");
-    activeCacheClient = createClient({ url: cacheUrl });
+    console.log("Creating cache client on IPv4...");
+    const client = createClient({ url: cacheUrl });
 
-    activeCacheClient.on('error', (error) => {
+    client.on('error', (error) => {
         console.error('cache_connection_failed', error.message);
     });
 
-    await activeCacheClient.connect();
-    return activeCacheClient;
+    // Evitar concorrência (Race Condition)
+    connectionPromise = client.connect().then(() => client).catch((err) => {
+        connectionPromise = null; // Reseta em caso de falha para tentar novamente
+        throw err;
+    });
+
+    return connectionPromise;
 }
 
 export async function saveVehicleState(vehicleData) {

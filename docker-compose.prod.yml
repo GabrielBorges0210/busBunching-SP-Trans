@@ -1,0 +1,13 @@
+services:
+  app:
+    build: .
+    restart: always
+    ports:
+      - "3000:3000" # Expondo a porta da sua API/WebSocket para o mundo
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - MONGO_URL=mongodb://admin:password@mongodb:27017/sptrans_monitor?authSource=admin
+      - SPTRANS_API_TOKEN=${SPTRANS_API_TOKEN}
+    depends_on:
+      - redis
+      - mongodb

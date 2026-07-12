@@ -86,7 +86,11 @@ export async function startBunchingEngine() {
                             line: currentLineId,
                             lastSeenAt: now,
                             isNotified: true,
-                            signature: pairSignature
+                            signature: pairSignature,
+                            location: {
+                                lat: v1Data.latitude,
+                                lng: v1Data.longitude
+                            }
                         };
 
                         activeIncidentsRegistry.set(pairSignature, newIncident);
@@ -94,6 +98,13 @@ export async function startBunchingEngine() {
                     } else {
                         const incidentState = activeIncidentsRegistry.get(pairSignature);
                         incidentState.lastSeenAt = now;
+                        // Update the location so the map marker moves along with the buses
+                        incidentState.location = {
+                            lat: v1Data.latitude,
+                            lng: v1Data.longitude
+                        };
+
+                        engineEvents.emit('incident_updated', incidentState);
                     }
                 }
             }

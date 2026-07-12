@@ -1,14 +1,16 @@
-import { MongoClient } from 'mongodataBase';
+import { MongoClient } from 'mongodb';
 
 const uri = process.env.MONGO_URL;
 const client = new MongoClient(uri);
 
-let dataBase;
+let database;
 
 export async function connectToDatabase() {
-    if (dataBase) return dataBase;
+    if (database) return database;
+    
     await client.connect();
-    dataBase = client.dataBase('sptrans_monitor');
+    database = client.db('sptrans_monitor');
+    
     console.log('mongo_manager: Connected successfully');
-    return dataBase;
+    return database;
 }

@@ -30,6 +30,10 @@ engineEvents.on('incident_opened', (incidentData) => {
     broadcast({ type: 'INCIDENT_OPENED', payload: incidentData });
 });
 
+engineEvents.on('incident_updated', (incident) => {
+    broadcast({ type: 'INCIDENT_UPDATED', payload: incident });
+});
+
 engineEvents.on('incident_resolved', (incidentData) => {
     broadcast({ type: 'INCIDENT_RESOLVED', payload: incidentData });
 });

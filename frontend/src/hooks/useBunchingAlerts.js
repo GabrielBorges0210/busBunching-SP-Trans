@@ -32,20 +32,16 @@ export function useBunchingAlerts() {
                 if (type === 'INCIDENT_RESOLVED') {
                     if (!previousIncidents[incidentKey]) return previousIncidents;
 
-                    return {
-                        ...previousIncidents,
-                        [incidentKey]: {
-                            ...previousIncidents[incidentKey],
-                            status: 'RESOLVED',
-                            lastUpdated: Date.now()
-                        }
-                    };
+                    const newDictionary = { ...previousIncidents };
+                    delete newDictionary[incidentKey];
+                    return newDictionary;
                 }
 
                 return {
                     ...previousIncidents,
                     [incidentKey]: {
-                        ...payload,
+                        ...previousIncidents[incidentKey], // Mantém dados anteriores seguros
+                        ...payload, // Atualiza com as novas coordenadas
                         status: 'OPENED',
                         lastUpdated: Date.now()
                     }
@@ -56,11 +52,13 @@ export function useBunchingAlerts() {
         return () => socket.close();
     }, []);
 
-    // Encapsulating the sorting logic inside the hook so the UI stays dumb
-    const sortedIncidents = Object.values(incidents).sort((a, b) => b.lastUpdated - a.lastUpdated);
+    const stableIncidentsForMap = Object.values(incidents);
+    
+    const sortedIncidentsForSidebar = [...stableIncidentsForMap].sort((a, b) => b.lastUpdated - a.lastUpdated);
 
     return {
-        incidents: sortedIncidents,
+        sidebarIncidents: sortedIncidentsForSidebar,
+        mapIncidents: stableIncidentsForMap,
         connectionStatus
     };
 }

@@ -42,3 +42,6 @@ jobs:
       # Vamos mandar o Node checar o arquivo principal sem executá-lo de fato.
       - name: 🔍 Verificação de Sintaxe (Syntax Check)
         run: node --check src/server.js
+
+      - name: Teste de Build do Docker
+        run: docker compose -f docker-compose.yml -f docker-compose.prod.yml build
